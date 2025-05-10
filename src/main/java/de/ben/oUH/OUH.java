@@ -13,7 +13,8 @@ public final class OUH extends JavaPlugin {
         FirstJoin firstJoin = new FirstJoin(this);
         AdminItem adminItem = new AdminItem();
         Pvp pvp = new Pvp(this);
-        AdminMenu adminMenu = new AdminMenu(this); // <- Admin-Menü hinzufügen
+        AdminMenu adminMenu = new AdminMenu(this);
+        StatusCommand statusCommand = new StatusCommand(this);
 
         // Listener registrieren
         Bukkit.getPluginManager().registerEvents(death, this);
@@ -27,7 +28,7 @@ public final class OUH extends JavaPlugin {
         getCommand("spawn").setExecutor(spawn);
         getCommand("help").setExecutor(firstJoin);
         getCommand("pvp").setExecutor(pvp);
-        // Der "admin" Befehl wird in AdminMenu registriert
+        getCommand("status").setExecutor(statusCommand); // ✅ Status-Command
     }
 
     @Override
