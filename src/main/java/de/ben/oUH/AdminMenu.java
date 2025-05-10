@@ -35,6 +35,10 @@ public class AdminMenu implements CommandExecutor, Listener {
     @Override
     public boolean onCommand(CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) return false;
+        if (!player.hasPermission("ouh.admin.cmd")) {
+            player.sendMessage("§cDazu hast du keine Berechtigung.");
+            return true;
+        }
         openMainMenu(player);
         return true;
     }
@@ -44,6 +48,7 @@ public class AdminMenu implements CommandExecutor, Listener {
         menu.setItem(11, createItem(Material.PLAYER_HEAD, "§aSpieler anzeigen", List.of("§7Klicke, um alle Spieler zu sehen")));
         menu.setItem(13, createItem(Material.ENDER_PEARL, "§bTeleport zu zufälligem Spieler", null));
         menu.setItem(15, createItem(Material.BOOK, "§cMehr Reports", null));
+        menu.setItem(22, createItem(Material.INK_SAC, "§3Vanish", List.of("§7Klicke, um Vanish zu toggeln")));
         player.openInventory(menu);
     }
 
@@ -51,11 +56,10 @@ public class AdminMenu implements CommandExecutor, Listener {
         playerTargets.put(player.getUniqueId(), target.getUniqueId());
         Inventory menu = Bukkit.createInventory(null, 54, PLAYER_MENU_TITLE);
 
-        menu.setItem(12, createToggleItem(Material.FEATHER, "§bFly (Rechtsklick)", player.getAllowFlight()));
-        menu.setItem(13, createToggleItem(Material.REDSTONE_TORCH, "§eGod Mode (Rechtsklick)", player.isInvulnerable()));
+        menu.setItem(12, createToggleItem(Material.FEATHER, "§bFly (Rechtsklick)", target.getAllowFlight()));
+        menu.setItem(13, createToggleItem(Material.REDSTONE_TORCH, "§eGod Mode (Rechtsklick)", target.isInvulnerable()));
         menu.setItem(14, createItem(Material.DIAMOND_CHESTPLATE, "§6Inventar ansehen", null));
         menu.setItem(21, createItem(Material.PLAYER_HEAD, "§dKopf erhalten", null));
-        menu.setItem(22, createItem(Material.BOOK, "§cMehr Reports", null));
         menu.setItem(23, createItem(Material.RED_DYE, "§cSpieler kicken", null));
         menu.setItem(30, createItem(Material.NETHERITE_AXE, "§4Spieler bannen", null));
         menu.setItem(31, createItem(Material.NETHERITE_SWORD, "§cSpieler töten", null));
@@ -96,21 +100,27 @@ public class AdminMenu implements CommandExecutor, Listener {
         }
 
         if (title.equals(MAIN_MENU_TITLE)) {
-            if (clicked.getType() == Material.PLAYER_HEAD) {
-                openPlayerList(player);
-            } else if (clicked.getType() == Material.ENDER_PEARL) {
-                List<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
-                players.remove(player);
-                if (!players.isEmpty()) {
-                    Player random = players.get((int) (Math.random() * players.size()));
-                    player.teleport(random.getLocation());
-                    player.sendMessage("§aTeleportiert zu §e" + random.getName());
-                } else {
-                    player.sendMessage("§cKeine anderen Spieler online.");
+            switch (clicked.getType()) {
+                case PLAYER_HEAD -> openPlayerList(player);
+                case ENDER_PEARL -> {
+                    List<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
+                    players.remove(player);
+                    if (!players.isEmpty()) {
+                        Player random = players.get((int) (Math.random() * players.size()));
+                        player.teleport(random.getLocation());
+                        player.sendMessage("§aTeleportiert zu §e" + random.getName());
+                    } else {
+                        player.sendMessage("§cKeine anderen Spieler online.");
+                    }
                 }
-            } else if (clicked.getType() == Material.BOOK) {
-                player.performCommand("reports");
-                player.closeInventory();
+                case BOOK -> {
+                    player.performCommand("reports");
+                    player.closeInventory();
+                }
+                case INK_SAC -> {
+                    player.performCommand("vanish");
+                    player.closeInventory();
+                }
             }
         }
 
@@ -140,16 +150,16 @@ public class AdminMenu implements CommandExecutor, Listener {
                 case FEATHER -> {
                     if (!hasPermission(player, "ouh.menu.fly")) return;
                     if (click.isRightClick()) {
-                        boolean newState = !player.getAllowFlight();
-                        player.setAllowFlight(newState);
-                        player.setFlying(newState);
+                        boolean newState = !target.getAllowFlight();
+                        target.setAllowFlight(newState);
+                        target.setFlying(newState);
                         openPlayerMenu(player, target);
                     }
                 }
                 case REDSTONE_TORCH -> {
                     if (!hasPermission(player, "ouh.menu.god")) return;
                     if (click.isRightClick()) {
-                        player.setInvulnerable(!player.isInvulnerable());
+                        target.setInvulnerable(!target.isInvulnerable());
                         openPlayerMenu(player, target);
                     }
                 }
@@ -167,10 +177,6 @@ public class AdminMenu implements CommandExecutor, Listener {
                     skull.setItemMeta(meta);
                     player.getInventory().addItem(skull);
                     player.sendMessage("§dKopf von §e" + target.getName() + " §derhalten.");
-                    player.closeInventory();
-                }
-                case BOOK -> {
-                    player.performCommand("reports");
                     player.closeInventory();
                 }
                 case RED_DYE -> {
