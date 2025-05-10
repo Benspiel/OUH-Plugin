@@ -2,19 +2,23 @@ name: OUH
 version: '1.0-SNAPSHOT'
 main: de.ben.oUH.OUH
 api-version: '1.21'
+
+softdepend:
+  - PlaceholderAPI
+
 commands:
   spawn:
     description: Teleportiert dich zum Spawn, wenn du 5 Sekunden stillstehst
     usage: /spawn
   help:
-    description: Gibt dir nen Buch
+    description: Gibt dir ein Buch
     usage: /help
   pvp:
-    description: Du kannst ken Pvp mehr
+    description: PvP aktivieren/deaktivieren
     usage: /pvp
   admin:
-    description: Du kannst ken Pvp mehr
-    usage: /pvp
+    description: Admin-Menü öffnen
+    usage: /admin
   status:
     description: Setzt oder entfernt deinen Status im Tab
     usage: /status [name]

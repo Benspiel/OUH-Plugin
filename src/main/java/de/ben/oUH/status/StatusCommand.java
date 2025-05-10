@@ -1,4 +1,4 @@
-package de.ben.oUH;
+package de.ben.oUH.status;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -24,16 +24,23 @@ public class StatusCommand implements CommandExecutor {
 
     public StatusCommand(JavaPlugin plugin) {
         this.plugin = plugin;
-        this.statusFile = new File(plugin.getDataFolder(), "status.json");
-        this.playerStatusFile = new File(plugin.getDataFolder(), "player_status.json");
+
+        File pluginFolder = new File(Bukkit.getPluginsFolder(), "Ouh");
+        if (!pluginFolder.exists()) pluginFolder.mkdirs();
+
+        this.statusFile = new File(pluginFolder, "status.json");
+        this.playerStatusFile = new File(pluginFolder, "player_status.json");
 
         loadStatuses();
         loadPlayerStatuses();
 
-        // Namen beim Reload setzen
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            new StatusPlaceholder(playerStatuses, statuses).register();
+        }
+
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
-                updateTabName(player);
+                // Nur für mögliche spätere Erweiterung
             }
         }, 20L);
     }
@@ -87,23 +94,10 @@ public class StatusCommand implements CommandExecutor {
         }
     }
 
-    private void updateTabName(Player player) {
-        String prefix = ""; // Hier kannst du evtl. LuckPerms-API nutzen für Prefix
-        String statusDisplay = "";
-
-        UUID uuid = player.getUniqueId();
-        if (playerStatuses.containsKey(uuid)) {
-            String key = playerStatuses.get(uuid);
-            statusDisplay = " " + statuses.getOrDefault(key, "");
-        }
-
-        player.setPlayerListName(ChatColor.translateAlternateColorCodes('&', prefix + player.getName() + statusDisplay));
-    }
-
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("Nur Spieler dürfen diesen Befehl benutzen.");
+            sender.sendMessage("Nur Spieler dürfen diesen Befehl verwenden.");
             return true;
         }
 
@@ -112,7 +106,6 @@ public class StatusCommand implements CommandExecutor {
         if (args.length == 0) {
             playerStatuses.remove(uuid);
             savePlayerStatuses();
-            updateTabName(player);
             player.sendMessage(ChatColor.GREEN + "Dein Status wurde entfernt.");
             return true;
         }
@@ -125,8 +118,11 @@ public class StatusCommand implements CommandExecutor {
 
         playerStatuses.put(uuid, input);
         savePlayerStatuses();
-        updateTabName(player);
         player.sendMessage(ChatColor.GREEN + "Status gesetzt auf: " + statuses.get(input));
         return true;
+    }
+
+    public Map<String, String> getStatuses() {
+        return statuses;
     }
 }

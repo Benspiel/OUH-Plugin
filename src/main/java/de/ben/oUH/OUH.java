@@ -1,5 +1,7 @@
 package de.ben.oUH;
 
+import de.ben.oUH.status.StatusCommand;
+import de.ben.oUH.status.StatusTabCompleter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -28,7 +30,8 @@ public final class OUH extends JavaPlugin {
         getCommand("spawn").setExecutor(spawn);
         getCommand("help").setExecutor(firstJoin);
         getCommand("pvp").setExecutor(pvp);
-        getCommand("status").setExecutor(statusCommand); // ✅ Status-Command
+        getCommand("status").setExecutor(statusCommand);
+        getCommand("status").setTabCompleter(new StatusTabCompleter(statusCommand.getStatuses()));
     }
 
     @Override
