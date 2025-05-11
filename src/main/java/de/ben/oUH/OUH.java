@@ -32,6 +32,7 @@ public final class OUH extends JavaPlugin {
         getCommand("pvp").setExecutor(pvp);
         getCommand("status").setExecutor(statusCommand);
         getCommand("status").setTabCompleter(new StatusTabCompleter(statusCommand.getStatuses()));
+
     }
 
     @Override

@@ -61,9 +61,12 @@ public class AdminMenu implements CommandExecutor, Listener {
         menu.setItem(14, createItem(Material.DIAMOND_CHESTPLATE, "§6Inventar ansehen", null));
         menu.setItem(21, createItem(Material.PLAYER_HEAD, "§dKopf erhalten", null));
         menu.setItem(23, createItem(Material.RED_DYE, "§cSpieler kicken", null));
-        menu.setItem(30, createItem(Material.NETHERITE_AXE, "§4Spieler bannen", null));
+        menu.setItem(24, createItem(Material.NOTE_BLOCK, "§eSpieler muten", null));
+        menu.setItem(25, createItem(Material.JUKEBOX, "§aSpieler entmuten", null));
+        menu.setItem(30, createItem(Material.MACE, "§4Spieler bannen", null));
         menu.setItem(31, createItem(Material.NETHERITE_SWORD, "§cSpieler töten", null));
         menu.setItem(32, createItem(Material.GOLDEN_APPLE, "§aSpieler heilen", null));
+        menu.setItem(33, createItem(Material.IRON_DOOR, "§2Spieler entbannen", null));
         menu.setItem(39, createItem(Material.POTION, "§eSpieler füttern", null));
         menu.setItem(41, createItem(Material.ENDER_PEARL, "§bTeleport zu Spieler", null));
         menu.setItem(49, createItem(Material.BARRIER, "§cZurück", null));
@@ -118,7 +121,7 @@ public class AdminMenu implements CommandExecutor, Listener {
                     player.closeInventory();
                 }
                 case INK_SAC -> {
-                    player.performCommand("vanish");
+                    player.performCommand("v");
                     player.closeInventory();
                 }
             }
@@ -153,6 +156,7 @@ public class AdminMenu implements CommandExecutor, Listener {
                         boolean newState = !target.getAllowFlight();
                         target.setAllowFlight(newState);
                         target.setFlying(newState);
+                        target.sendMessage("§bFly-Modus wurde " + (newState ? "§aaktiviert" : "§cdeaktiviert"));
                         openPlayerMenu(player, target);
                     }
                 }
@@ -160,6 +164,7 @@ public class AdminMenu implements CommandExecutor, Listener {
                     if (!hasPermission(player, "ouh.menu.god")) return;
                     if (click.isRightClick()) {
                         target.setInvulnerable(!target.isInvulnerable());
+                        target.sendMessage("§eGod Mode wurde " + (target.isInvulnerable() ? "§aaktiviert" : "§cdeaktiviert"));
                         openPlayerMenu(player, target);
                     }
                 }
@@ -176,31 +181,41 @@ public class AdminMenu implements CommandExecutor, Listener {
                     meta.setDisplayName("§d" + target.getName() + "s Kopf");
                     skull.setItemMeta(meta);
                     player.getInventory().addItem(skull);
-                    player.sendMessage("§dKopf von §e" + target.getName() + " §derhalten.");
                     player.closeInventory();
                 }
                 case RED_DYE -> {
                     if (!hasPermission(player, "ouh.menu.kick")) return;
                     player.performCommand("kick " + target.getName());
-                    player.sendMessage("§c" + target.getName() + " wurde gekickt.");
                     player.closeInventory();
                 }
-                case NETHERITE_AXE -> {
+                case NOTE_BLOCK -> {
+                    if (!hasPermission(player, "ouh.menu.mute")) return;
+                    player.performCommand("mute " + target.getName());
+                    player.closeInventory();
+                }
+                case JUKEBOX -> {
+                    if (!hasPermission(player, "ouh.menu.unmute")) return;
+                    player.performCommand("unmute " + target.getName());
+                    player.closeInventory();
+                }
+                case MACE -> {
                     if (!hasPermission(player, "ouh.menu.ban")) return;
                     player.performCommand("ban " + target.getName());
-                    player.sendMessage("§4" + target.getName() + " wurde gebannt.");
+                    player.closeInventory();
+                }
+                case IRON_DOOR -> {
+                    if (!hasPermission(player, "ouh.menu.unban")) return;
+                    player.performCommand("unban " + target.getName());
                     player.closeInventory();
                 }
                 case NETHERITE_SWORD -> {
                     if (!hasPermission(player, "ouh.menu.kill")) return;
                     target.setHealth(0);
-                    player.sendMessage("§c" + target.getName() + " wurde getötet.");
                     player.closeInventory();
                 }
                 case GOLDEN_APPLE -> {
                     if (!hasPermission(player, "ouh.menu.heal")) return;
                     target.setHealth(target.getMaxHealth());
-                    player.sendMessage("§a" + target.getName() + " wurde geheilt.");
                     target.sendMessage("§aDu wurdest geheilt.");
                     player.closeInventory();
                 }
@@ -208,14 +223,12 @@ public class AdminMenu implements CommandExecutor, Listener {
                     if (!hasPermission(player, "ouh.menu.feed")) return;
                     target.setFoodLevel(20);
                     target.setSaturation(20f);
-                    player.sendMessage("§e" + target.getName() + " wurde gefüttert.");
                     target.sendMessage("§eDu wurdest gefüttert.");
                     player.closeInventory();
                 }
                 case ENDER_PEARL -> {
                     if (!hasPermission(player, "ouh.menu.tp")) return;
                     player.teleport(target.getLocation());
-                    player.sendMessage("§bTeleportiert zu §e" + target.getName());
                     player.closeInventory();
                 }
                 case BARRIER -> openMainMenu(player);
