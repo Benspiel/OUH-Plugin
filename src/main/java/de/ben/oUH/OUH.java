@@ -10,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import de.ben.oUH.NoFly;
 
 public final class OUH extends JavaPlugin {
 
@@ -17,7 +18,7 @@ public final class OUH extends JavaPlugin {
     public void onEnable() {
         if (isBlocked()) {
             getLogger().severe("§cStart verweigert.");
-            return; // Plugin bleibt "inaktiv"
+            return;
         }
 
         // Listener-Instanzen erstellen
@@ -35,7 +36,7 @@ public final class OUH extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(firstJoin, this);
         Bukkit.getPluginManager().registerEvents(adminItem, this);
         Bukkit.getPluginManager().registerEvents(pvp, this);
-
+        Bukkit.getServer().getPluginManager().registerEvents(new NoFly(), this);
         // Commands registrieren
         getCommand("spawn").setExecutor(spawn);
         getCommand("help").setExecutor(firstJoin);
@@ -61,7 +62,7 @@ public final class OUH extends JavaPlugin {
             Object block = obj.get("block");
             return block instanceof Boolean && (Boolean) block;
         } catch (Exception e) {
-            return true; // Wenn Fehler -> sicherheitshalber blockieren
+            return true;
         }
     }
 
